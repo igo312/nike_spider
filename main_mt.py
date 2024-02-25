@@ -34,6 +34,8 @@ from config import *
 import time 
 from tenacity import retry, stop_after_attempt, wait_fixed
 
+from selenium.webdriver.chrome.service import Service as ChromeService
+import os 
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -44,6 +46,10 @@ def parse_args():
     return parser.parse_args()
 
 def getWebdriver():
+    chrome_dir = "/home/keke/code/wangjunjie/chrome"
+    chrome_path = os.path.join(chrome_dir, "chrome")
+    chromedriver_path  = os.path.join(chrome_dir, "chromedriver-linux64/chromedriver")
+    
     # 创建一个ChromeOptions对象
     chrome_options = Options()
     # 在ChromeOptions中添加--headless参数
@@ -52,7 +58,12 @@ def getWebdriver():
     # chrome_options.add_argument(f'--proxy-server=socks5://127.0.0.1:1083') # socks 代理
     prefs = {'profile.managed_default_content_settings.images': 2, 'permissions.default.stylesheet': 2}
     chrome_options.add_experimental_option('prefs', prefs)
-    driver = webdriver.Chrome(options=chrome_options)
+
+    # 指定版本chrome，避免和其他环境的文件冲突
+    chrome_options.binary_location = chrome_path
+    service = ChromeService(chromedriver_path)
+
+    driver = webdriver.Chrome(options=chrome_options, service=service)
     return driver 
 
 def generate_unique_id(shoeName, shoeColor):
